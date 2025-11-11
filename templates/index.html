@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Analyzer</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <a href="/" class="logo">CryptoPrice AI</a>
+            <span class="nav-link">Model Status: 
+                {% if model_ready %}
+                    <strong style="color: var(--success-color);">Ready</strong>
+                {% else %}
+                    <strong style="color: var(--danger-color);">Not Loaded</strong>
+                {% endif %}
+            </span>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <main class="card">
+            <h1 class="card-title">Crypto Price Predictor</h1>
+            
+            {% if not model_ready %}
+            <div class="alert alert-danger">
+                <strong>Model Not Found!</strong> The prediction model files are missing.
+                Please contact the administrator or run the <code>model_training.ipynb</code> notebook to generate them.
+            </div>
+            {% endif %}
+
+            <form class="upload-form" action="/predict" method="post" enctype="multipart/form-data">
+                <p>Upload one or more CSV files to test against the trained model. Files must contain 'date', 'price', and 'total_volume' columns.</p>
+                
+                <div class="file-upload-wrapper">
+                    <input type="file" name="csv_files" id="file-upload-input" multiple required 
+                           {% if not model_ready %}disabled{% endif %}>
+                    
+                    <label for="file-upload-input" class="file-upload-label">
+                        Click to Choose Files
+                    </label>
+                    
+                    <div id="file-upload-filename">No files chosen...</div>
+                </div>
+
+                <button type="submit" id="submit-button" class="btn" 
+                        {% if not model_ready %}disabled{% endif %}>
+                    Analyze and Predict
+                </button>
+            </form>
+
+        </main>
+    </div>
+
+    <!-- Link to the external JS file -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <a href="/" class="logo">CryptoPrice AI</a>
+            <a href="/" class="nav-link">Run New Analysis</a>
+        </header>
+
+        <main>
+            <a href="/" class="back-link">&larr; Back to Upload</a>
+            
+            {% if error %}
+                <div class="card">
+                    <h1 class="card-title" style="color: var(--danger-color);">An Error Occurred</h1>
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                    <p>Please check your files and try again. Ensure they are valid CSVs with the required 'date', 'price', and 'total_volume' columns.</p>
+                </div>
+            
+            {% elif metrics and plots %}
+                
+                <div class="results-grid">
+                    <div class="card metrics-card">
+                        <h2 class="card-title">Model Performance</h2>
+                        <ul class="metrics-list">
+                            <li>
+                                <strong>R-squared (R²) Score:</strong> 
+                                <span class="r2-score">{{ "%.4f"|format(metrics.r2) }}</span>
+                            </li>
+                            <li>
+                                <strong>Root Mean Squared Error:</strong>
+                                <span>${{ "%.2f"|format(metrics.rmse) }}</span>
+                            </li>
+                            <li>
+                                <strong>Mean Squared Error:</strong>
+                                <span>${{ "%.2f"|format(metrics.mse) }}</span>
+                            </li>
+                            <li>
+                                <strong>Total Predictions Made:</strong>
+                                <span class="count">{{ metrics.prediction_count }}</span>
+                            </li>
+                            <li>
+                                <strong>Files Analyzed:</strong>
+                                <span class="count">{{ filenames|length }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card plot-card">
+                        <h2 class="card-title">Prediction vs. Actual (Time-Series)</h2>
+                        <img src="data:image/png;base64,{{ plots.time_series }}" alt="Time-Series Plot">
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    {% if plots.feature_importance %}
+                    <div class="card plot-card">
+                        <h2 class="card-title">Feature Importance</h2>
+                        <p style="color: var(--secondary-color); font-size: 0.9em;">Which data does the model value most?</p>
+                        <img src="data:image/png;base64,{{ plots.feature_importance }}" alt="Feature Importance Plot" style="max-width: 600px;">
+                    </div>
+                    {% endif %}
+
+                    {% if plots.error_histogram %}
+                    <div class="card plot-card">
+                        <h2 class="card-title">Distribution of Prediction Errors</h2>
+                        <p style="color: var(--secondary-color); font-size: 0.9em;">Are the model's errors biased?</p>
+                        <img src="data:image/png;base64,{{ plots.error_histogram }}" alt="Error Histogram Plot">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card plot-card">
+                    <h2 class="card-title">Actual vs. Predicted Price (Scatter Plot)</h2>
+                    <img src="data:image/png;base64,{{ plots.scatter }}" alt="Scatter Plot" style="max-width: 600px;">
+                </div>
+
+            {% else %}
+                <div class="card">
+                    <div class="alert alert-warning">
+                        An unknown error occurred. No results were generated.
+                    </div>
+                </div>
+            {% endif %}
+
+        </main>
+    </div>
+
+</body>
+</html>
